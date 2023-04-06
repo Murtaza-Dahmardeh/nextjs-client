@@ -1,0 +1,22 @@
+//ALERTS:
+export const SET_ALERT = "SET_ALERT";
+export const REMOVE_ALERT = "REMOVE_ALERT";
+
+// Users
+export const CREATE_USER = 'CREATE_USER';
+export const CREATE_USER_SUCCESS = 'CREATE_USER_SUCCESS';
+export const CREATE_USER_ERROR = 'CREATE_USER_ERROR';
+export const READ_USER = 'READ_USER';
+export const READ_USER_SUCCESS = 'READ_USER_SUCCESS';
+export const READ_USER_ERROR = 'READ_USER_ERROR';
+export const READ_USERS = 'READ_USERS';
+export const READ_USERS_SUCCESS = 'READ_USERS_SUCCESS';
+export const READ_USERS_ERROR = 'READ_USERS_ERROR';
+export const UPDATE_USER = 'UPDATE_USER';
+export const UPDATE_USER_SUCCESS = 'UPDATE_USER_SUCCESS';
+export const UPDATE_USER_ERROR = 'UPDATE_USER_ERROR';
+export const DELETE_USER = 'DELETE_USER';
+export const DELETE_USER_SUCCESS = 'DELETE_USER_SUCCESS';
+export const DELETE_USER_ERROR = 'DELETE_USER_ERROR';
+
+export * from './user/actions';
