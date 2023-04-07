@@ -1,4 +1,4 @@
-import { useState, useRef, Fragment } from "react";
+import { useState, useRef, Fragment, useEffect } from "react";
 import { ChevronDownIcon, ExclamationTriangleIcon, PencilIcon } from "@heroicons/react/20/solid";
 import { Dialog, Switch, Transition } from "@headlessui/react";
 import ReactCrop, {
@@ -11,6 +11,9 @@ import 'react-image-crop/dist/ReactCrop.css';
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { connect } from "react-redux";
 import { createUser } from '../../redux/actions';
+import { canvasPreview } from '../../components/canvasPreview'
+import { useDebounceEffect } from '../../components/useDebounceEffect'
+import { useRouter } from 'next/router'
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -18,33 +21,63 @@ function classNames(...classes: string[]) {
 
 function Register({
   registerUserAction,
+  userInfo
 }: any) {
   const [agreed, setAgreed] = useState(false);
 
-  const [imgSrc, setImgSrc] = useState('')
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null)
-  const imgRef = useRef<HTMLImageElement>(null)
-  const hiddenAnchorRef = useRef<HTMLAnchorElement>(null)
-  const blobUrlRef = useRef('')
-  const [crop, setCrop] = useState<Crop>()
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop>()
-  const [scale, setScale] = useState(1)
-  const [rotate, setRotate] = useState(0)
-  const [aspect, setAspect] = useState<number | undefined>(1)
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [title, setTitle] = useState('');
+  const [imgSrc, setImgSrc] = useState('');
+  const [profileSrc, setProfileSrc] = useState('');
+  const [profilePicName, setProfilePicName] = useState('');
+  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const hiddenAnchorRef = useRef<HTMLAnchorElement>(null);
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
 
   const [open, setOpen] = useState(false);
   const cancelButtonRef = useRef(null);
 
-  async function onUserRegister(event: { preventDefault: () => void; target: any; } | undefined) {
+  useEffect(() => {
+    if (profilePicName != "") {
+      fetch(`http://localhost:8000/api/photos/${profilePicName}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch image');
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          const imageUrl = URL.createObjectURL(blob);
+          setProfileSrc(imageUrl);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+  }, [profilePicName]);
 
+  useEffect(() => {
+    if (userInfo.id) {
+      const router = useRouter()
+      router.push(`/users/${userInfo.id}`)
+    }
+    console.log(userInfo)
+  }, [userInfo]);
+
+  function onUserRegister(event: { preventDefault: () => void; target: any; } | undefined) {
     if (event) {
       event.preventDefault(); // prevent the form from submitting normally
-
       const form = event.target; // get the form element
       const formData = new FormData(form); // create a new FormData object with the form data  
+      formData.append('profile_picture', profilePicName);
       registerUserAction(formData);
     }
   };
+
+
 
   function centerAspectCrop(
     mediaWidth: number,
@@ -78,11 +111,55 @@ function Register({
   }
 
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
-    if (aspect) {
-      const { width, height } = e.currentTarget
-      setCrop(centerAspectCrop(width, height, aspect))
-    }
+    const { width, height } = e.currentTarget
+    setCrop(centerAspectCrop(width, height, 1))
   }
+
+  function onDownloadCropClick() {
+    if (!previewCanvasRef.current) {
+      throw new Error('Crop canvas does not exist')
+    }
+
+    previewCanvasRef.current.toBlob((blob) => {
+      if (!blob) {
+        throw new Error('Failed to create blob')
+      }
+      const formData = new FormData()
+      formData.append('image', blob, 'image.jpg')
+
+      fetch('http://localhost:8000/api/upload', {
+        method: 'POST',
+        body: formData,
+      }).then(response => response.json())
+        .then(data => {
+          setProfilePicName(data.filename.replace('photos/', ''));
+        })
+    })
+    setOpen(false);
+  }
+
+  useDebounceEffect(
+    async () => {
+      if (
+        completedCrop?.width &&
+        completedCrop?.height &&
+        imgRef.current &&
+        previewCanvasRef.current
+      ) {
+        // We use canvasPreview as it's much faster than imgPreview.
+        canvasPreview(
+          imgRef.current,
+          previewCanvasRef.current,
+          completedCrop,
+          1,
+          0,
+        )
+      }
+    },
+    100,
+    [completedCrop, 1, 0],
+  )
+
 
   return (
     <div className="isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
@@ -107,8 +184,7 @@ function Register({
         </p>
       </div>
       <form
-        action="#"
-        method="POST"
+        id="createUserForm"
         onSubmit={onUserRegister}
         className="mx-auto mt-16 max-w-xl sm:mt-20"
       >
@@ -118,15 +194,15 @@ function Register({
         >
           <img
             className="h-16 w-16 rounded-md"
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+            src={profileSrc == "" ? "https://placehold.co/400x400?text=Please+Upload" : profileSrc}
             alt=""
           />
           <div>
             <h3 className="text-base font-semibold leading-7 tracking-tight text-gray-900">
-              Murtaza Mohammadi
+              {firstName} {" "} {lastName}
             </h3>
             <p className="text-sm font-semibold leading-6 text-indigo-600">
-              Full Stack Developer
+              {title}
             </p>
             <span className="hidden sm:block">
               <button
@@ -153,6 +229,7 @@ function Register({
                 type="text"
                 name="first_name"
                 id="first-name"
+                onChange={(event) => setFirstName(event.target.value)}
                 autoComplete="given-name"
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
@@ -170,6 +247,7 @@ function Register({
                 type="text"
                 name="last_name"
                 id="last-name"
+                onChange={(event) => setLastName(event.target.value)}
                 autoComplete="family-name"
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
@@ -187,6 +265,7 @@ function Register({
                 type="text"
                 name="title"
                 id="title"
+                onChange={(event) => setTitle(event.target.value)}
                 autoComplete="organization"
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
@@ -332,31 +411,61 @@ function Register({
                   leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                   leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
-                  <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                  <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm">
                     <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                      <div className="sm:flex sm:items-start">
-
+                      <div className="sm:flex sm:justify-center">
                         <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
                           <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
                             Profile Picture Editor
                           </Dialog.Title>
                           <div className="mt-2">
                             {!!imgSrc ? (
-                              <ReactCrop
-                                crop={crop}
-                                onChange={(_, percentCrop) => setCrop(percentCrop)}
-                                onComplete={(c) => setCompletedCrop(c)}
-                                aspect={aspect}
-                              >
-                                <img
-                                  ref={imgRef}
-                                  alt="Crop me"
-                                  src={imgSrc}
-                                  height={50}
-                                  style={{ transform: `scale(${scale}) rotate(${rotate}deg)`, maxHeight: '250px' }}
-                                  onLoad={onImageLoad}
-                                />
-                              </ReactCrop>
+                              <>
+                                <ReactCrop
+                                  crop={crop}
+                                  onChange={(_, percentCrop) => setCrop(percentCrop)}
+                                  onComplete={(c) => setCompletedCrop(c)}
+                                  aspect={1}
+                                >
+                                  <img
+                                    ref={imgRef}
+                                    alt="Crop me"
+                                    src={imgSrc}
+                                    height={50}
+                                    style={{ transform: `scale(${1}) rotate(${0}deg)`, maxHeight: '250px' }}
+                                    onLoad={onImageLoad}
+                                  />
+                                </ReactCrop>
+                                {!!completedCrop && (
+                                  <>
+                                    <div style={{ display: "none" }}>
+                                      <canvas
+                                        ref={previewCanvasRef}
+                                        style={{
+                                          border: '1px solid black',
+                                          objectFit: 'contain',
+                                          width: completedCrop.width,
+                                          height: completedCrop.height,
+                                        }}
+                                      />
+                                    </div>
+                                    <div style={{ display: "none" }}>
+                                      <button onClick={onDownloadCropClick}>Download Crop</button>
+                                      <a
+                                        ref={hiddenAnchorRef}
+                                        download
+                                        style={{
+                                          position: 'absolute',
+                                          top: '-200vh',
+                                          visibility: 'hidden',
+                                        }}
+                                      >
+                                        Hidden download
+                                      </a>
+                                    </div>
+                                  </>
+                                )}
+                              </>
                             ) : (
                               <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                                 <div className="text-center">
@@ -383,7 +492,7 @@ function Register({
                       <button
                         type="button"
                         className="inline-flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 sm:ml-3 sm:w-auto"
-                        onClick={() => setOpen(false)}
+                        onClick={onDownloadCropClick}
                       >
                         Crop and Save
                       </button>

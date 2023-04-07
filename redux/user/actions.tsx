@@ -22,9 +22,9 @@ export const createUser = (formData: any) => ({
     payload: formData,
 });
 
-export const createUserSuccess = (createdUser: any) => ({
+export const createUserSuccess = (user: any) => ({
     type: CREATE_USER_SUCCESS,
-    payload: { createdUser },
+    payload: { user },
 });
 
 export const createUserError = (message: any) => ({

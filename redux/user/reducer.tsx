@@ -42,6 +42,10 @@ export default (state = INIT_STATE, action: { type: string; payload: {
             return {
                 ...state,
                 loading: action.type === CREATE_USER,
+                userInfo:
+                    action.type === CREATE_USER_SUCCESS
+                        ? action.payload.user
+                        : state.userInfo,
                 notification:
                     action.type === CREATE_USER_SUCCESS
                         ? 'درخواست شما با موفقیت انجام شد'

@@ -35,8 +35,8 @@ interface UserPayload {
 function* createUser({ payload }: { payload: any }) : Generator<any, void, any> {
   try {
     const response = yield call(() => axios.post('http://localhost:8000/api/users', payload));
-
-    const item = { ...response.data.createdUser };
+    
+    const item = { ...response.data };
     yield put(createUserSuccess(item));
   } catch (error: any) {
     yield put(
@@ -81,7 +81,6 @@ function* readUsers() : Generator<any, void, any> {
     const response = yield call(() => axios.get('http://localhost:8000/api/users'));
     
     const item = response.data.users;
-    console.log(item);
     yield put(readUsersSuccess(item));
   } catch (error: any) {
     yield put(
