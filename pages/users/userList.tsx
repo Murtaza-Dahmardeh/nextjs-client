@@ -13,6 +13,7 @@ import { Menu, Transition } from "@headlessui/react";
 import { connect } from "react-redux";
 import { readUsers, deleteUser } from '../../redux/actions';
 import Link from "next/link";
+import toast from 'react-hot-toast';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -22,7 +23,9 @@ function List({
   listUsers,
   users,
   loading,
-  deleteAction
+  deleteAction,
+  notification,
+  action
 }: any) {
   const [userlist, setUserList] = useState([]);
 
@@ -44,10 +47,19 @@ function List({
     setUserList(users);
   }, [users]);
 
+  useEffect(() => {
+    if(action === "DELETE_USER_SUCCESS") {
+      toast.success(notification);
+    } else if (action === "DELETE_USER_SUCCESS") {
+      toast.error(notification);
+    }
+  }, [notification]);
+
   async function onDeleteUserClick(user: any) {
     await deleteAction(user.id);
     setUserList(userlist.filter((list:any) => list.id !== user.id))
   }
+
 
   return (
     <div className="isolate h-screen bg-white px-6 py-24 sm:py-32 lg:px-8">
@@ -64,7 +76,7 @@ function List({
         />
       </div>
       {userlist.map((user: any) => (
-        <div className="bg-white sm:px-6 sm:py-8 lg:px-8" key={user.id}>
+        <div className="border-b border-gray-600 bg-white px-4 py-4 sm:px-6 sm:py-8 lg:px-8" key={user.id}>
           <div className="">
             <div className="lg:flex lg:items-center lg:justify-between">
               <div className="min-w-0 flex-1">
@@ -169,7 +181,7 @@ function List({
                     <Menu.Items className="absolute right-0 z-10 -mr-1 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <Menu.Item>
                         {({ active }) => (
-                          <Link key={user.id} href={`/users/${user.id}`} className={classNames(
+                          <Link key={user.id} href={`/users/create/${user.id}`} className={classNames(
                             active ? "bg-gray-100" : "",
                             "block px-4 py-2 text-sm text-gray-700"
                           )}>

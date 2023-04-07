@@ -50,7 +50,7 @@ export default (state = INIT_STATE, action: {
                         : state.userInfo,
                 notification:
                     action.type === CREATE_USER_SUCCESS
-                        ? 'درخواست شما با موفقیت انجام شد'
+                        ? 'User Created Successfully'
                         : action.payload.message,
                 action: action.type,
             };
@@ -66,7 +66,7 @@ export default (state = INIT_STATE, action: {
                 loading: action.type === READ_USER,
                 notification:
                     action.type === READ_USER_SUCCESS
-                        ? 'درخواست شما با موفقیت انجام شد'
+                        ? 'User Loaded Successfuly'
                         : action.payload.message,
                 action: action.type,
             };
@@ -82,7 +82,7 @@ export default (state = INIT_STATE, action: {
                 loading: action.type === READ_USERS,
                 notification:
                     action.type === READ_USERS_SUCCESS
-                        ? 'درخواست شما با موفقیت انجام شد'
+                        ? 'Users Loaded Successfuly'
                         : action.payload.message,
                 action: action.type,
             };
@@ -98,7 +98,7 @@ export default (state = INIT_STATE, action: {
                         : state.userInfo,
                 notification:
                     action.type === UPDATE_USER_SUCCESS
-                        ? 'درخواست شما با موفقیت انجام شد'
+                        ? 'User Updated Successfuly'
                         : action.payload.message,
                 action: action.type,
             };
@@ -110,7 +110,7 @@ export default (state = INIT_STATE, action: {
                 loading: action.type === DELETE_USER,
                 notification:
                     action.type === DELETE_USER_SUCCESS
-                        ? 'درخواست شما با موفقیت انجام شد'
+                        ? 'User Deleted Successfuly'
                         : action.payload.message,
                 action: action.type,
             };

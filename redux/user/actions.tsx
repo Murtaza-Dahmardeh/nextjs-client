@@ -67,9 +67,9 @@ export const updateUser = (formData: any, id: string) => ({
     payload: {formData, id},
 });
 
-export const updateUserSuccess = (updatedUser: any) => ({
+export const updateUserSuccess = (user: any) => ({
     type: UPDATE_USER_SUCCESS,
-    payload: { updatedUser },
+    payload: { user },
 });
 
 export const updateUserError = (message: any) => ({

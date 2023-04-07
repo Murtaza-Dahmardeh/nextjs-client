@@ -41,7 +41,7 @@ function* createUser({ payload }: { payload: any }): Generator<any, void, any> {
   } catch (error: any) {
     yield put(
       createUserError(
-        error.response === undefined ? error.message : error.response.data.error
+        error.response === undefined ? error.message : error.response.data.message
       )
     );
   }
@@ -60,7 +60,7 @@ function* readUser({ payload }: { payload: any }): Generator<any, void, any> {
   } catch (error: any) {
     yield put(
       readUserError(
-        error.response === undefined ? error.message : error.response.data.error
+        error.response === undefined ? error.message : error.response.data.message
       )
     );
   }
@@ -79,7 +79,7 @@ function* readUsers(): Generator<any, void, any> {
   } catch (error: any) {
     yield put(
       readUsersError(
-        error.response === undefined ? error.message : error.response.data.error
+        error.response === undefined ? error.message : error.response.data.message
       )
     );
   }
@@ -94,11 +94,11 @@ function* updateUser({ payload }: { payload: any }): Generator<any, void, any> {
     const response = yield call(() => axios.post(`http://localhost:8000/api/update/${payload.id}`, payload.formData));
 
     const item = { ...response.data };
-    yield put(createUserSuccess(item.data));
+    yield put(updateUserSuccess(item.data));
   } catch (error: any) {
     yield put(
       createUserError(
-        error.response === undefined ? error.message : error.response.data.error
+        error.response === undefined ? error.message : error.response.data.message
       )
     );
   }
@@ -118,7 +118,7 @@ function* deleteUser({ payload }: { payload: any }): Generator<any, void, any> {
   } catch (error: any) {
     yield put(
       deleteUserError(
-        error.response === undefined ? error.message : error.response.data.error
+        error.response === undefined ? error.message : error.response.data.message
       )
     );
   }

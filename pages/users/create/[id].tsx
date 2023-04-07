@@ -1,6 +1,7 @@
 import { useState, useRef, Fragment, useEffect } from "react";
 import { ChevronDownIcon, ExclamationTriangleIcon, PencilIcon } from "@heroicons/react/20/solid";
 import { Dialog, Switch, Transition } from "@headlessui/react";
+import toast from 'react-hot-toast';
 import ReactCrop, {
   centerCrop,
   makeAspectCrop,
@@ -24,7 +25,8 @@ function Register({
   userInfo,
   action,
   readUserAction,
-  updateUserAction
+  updateUserAction,
+  notification
 }: any) {
   const [agreed, setAgreed] = useState(false);
   const [firstName, setFirstName] = useState('');
@@ -75,7 +77,8 @@ function Register({
   }, [profilePicName]);
 
   useEffect(() => {
-    if(action === "CREATE_USER_SUCCESS") {
+    if(action === "CREATE_USER_SUCCESS" || action === "UPDATE_USER_SUCCESS") {
+      toast.success(notification);
       if (userInfo.id) {
         router.push(`/users/view/${userInfo.id}`)
       }
@@ -88,8 +91,10 @@ function Register({
       setPhone(userInfo.phone_number);
       setBio(userInfo.bio);
       setProfilePicName(userInfo.profile_picture);
+    } else if (action === "READ_USER_ERROR" || action === "CREATE_USER_ERROR") {
+      toast.error(notification);
     }
-  }, [userInfo]);
+  }, [userInfo, notification]);
 
   function onUserRegister(event: { preventDefault: () => void; target: any; } | undefined) {
     if (event) {
@@ -106,8 +111,6 @@ function Register({
       }
     }
   };
-
-
 
   function centerAspectCrop(
     mediaWidth: number,
@@ -234,7 +237,7 @@ function Register({
             <p className="text-sm font-semibold leading-6 text-indigo-600">
               {title}
             </p>
-            <span className="hidden sm:block">
+            <span className="sm:block">
               <button
                 type="button"
                 onClick={() => setOpen(true)}

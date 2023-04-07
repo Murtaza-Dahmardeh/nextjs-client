@@ -5,17 +5,6 @@ import { useRouter } from "next/router";
 import { connect } from "react-redux";
 import { readUser } from '@components/redux/actions';
 
-interface User {
-  bio: string;
-  phone_number: string;
-  first_name: string;
-  last_name: string;
-  id: number;
-  email: string;
-  title: string;
-  company: string;
-}
-
 function UserDetails({
   readUserAction,
   userInfo
