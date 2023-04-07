@@ -77,9 +77,9 @@ export const updateUserError = (message: any) => ({
     payload: { message },
 });
 
-export const deleteUser = (user: any) => ({
+export const deleteUser = (id: any) => ({
     type: DELETE_USER,
-    payload: { user },
+    payload: { id },
 });
 
 export const deleteUserSuccess = (message: any) => ({

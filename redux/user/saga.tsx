@@ -114,15 +114,10 @@ function* watchUpdateUser() {
   yield takeEvery(UPDATE_USER, updateUser);
 }
 
-function* deleteUser({ payload }: { payload: UserPayload }) : Generator<any, void, any> {
+function* deleteUser({ payload }: { payload: any }) : Generator<any, void, any> {
   try {
-    const response = yield call(
-      axios.post,
-      `${API_PRIVATE_BASE_URL}/delete-user`,
-      {
-        payload,
-      },
-    );
+    console.log(payload)
+    const response = yield call(() => axios.delete(`http://localhost:8000/api/users/${payload.id}`));
 
     const item = { ...response.data.message };
     yield put(deleteUserSuccess(item));

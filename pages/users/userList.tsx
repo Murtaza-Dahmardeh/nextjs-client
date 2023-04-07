@@ -1,17 +1,18 @@
 import { Fragment, useEffect, useState } from "react";
 import {
   BriefcaseIcon,
-  CalendarIcon,
-  CheckIcon,
   ChevronDownIcon,
-  CurrencyDollarIcon,
+  AtSymbolIcon,
   LinkIcon,
   MapPinIcon,
   PencilIcon,
+  DevicePhoneMobileIcon,
+  TrashIcon
 } from "@heroicons/react/20/solid";
 import { Menu, Transition } from "@headlessui/react";
 import { connect } from "react-redux";
-import { readUsers } from '../../redux/actions';
+import { readUsers, deleteUser } from '../../redux/actions';
+import Link from "next/link";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -20,8 +21,11 @@ function classNames(...classes: string[]) {
 function List({
   listUsers,
   users,
-  loading
+  loading,
+  deleteAction
 }: any) {
+  const [userlist, setUserList] = useState([]);
+
   useEffect(() => {
     async function fetchUsers() {
       try {
@@ -30,10 +34,20 @@ function List({
         console.error(error);
       }
     }
-    if(!loading) {
+    if (!loading) {
       fetchUsers();
     }
+
   }, []);
+
+  useEffect(() => {
+    setUserList(users);
+  }, [users]);
+
+  async function onDeleteUserClick(user: any) {
+    await deleteAction(user.id);
+    setUserList(userlist.filter(list => list.id !== user.id))
+  }
 
   return (
     <div className="isolate h-screen bg-white px-6 py-24 sm:py-32 lg:px-8">
@@ -49,13 +63,13 @@ function List({
           }}
         />
       </div>
-      {users.map((user: any) => (
-        <div className="bg-white sm:px-6 sm:py-8 lg:px-8">
+      {userlist.map((user: any) => (
+        <div className="bg-white sm:px-6 sm:py-8 lg:px-8" key={user.id}>
           <div className="">
             <div className="lg:flex lg:items-center lg:justify-between">
               <div className="min-w-0 flex-1">
                 <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                  {user.first_name} {" "} {user.last_name} 
+                  {user.first_name} {" "} {user.last_name}
                 </h2>
                 <div className="mt-1 flex flex-col sm:mt-0 sm:flex-row sm:flex-wrap sm:space-x-6">
                   <div className="mt-2 flex items-center text-sm text-gray-500">
@@ -63,28 +77,28 @@ function List({
                       className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400"
                       aria-hidden="true"
                     />
-                    Full-time
+                    {user.title}
                   </div>
                   <div className="mt-2 flex items-center text-sm text-gray-500">
                     <MapPinIcon
                       className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400"
                       aria-hidden="true"
                     />
-                    Remote
+                    {user.company}
                   </div>
                   <div className="mt-2 flex items-center text-sm text-gray-500">
-                    <CurrencyDollarIcon
+                    <DevicePhoneMobileIcon
                       className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400"
                       aria-hidden="true"
                     />
-                    $120k &ndash; $140k
+                    {user.phone_number}
                   </div>
                   <div className="mt-2 flex items-center text-sm text-gray-500">
-                    <CalendarIcon
+                    <AtSymbolIcon
                       className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400"
                       aria-hidden="true"
                     />
-                    Closing on January 9, 2020
+                    {user.email}
                   </div>
                 </div>
               </div>
@@ -111,20 +125,23 @@ function List({
                       className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400"
                       aria-hidden="true"
                     />
-                    View
+                    <Link key={user.id} href={`/users/${user.id}`} className="block text-sm text-gray-700">
+                      View
+                    </Link>
                   </button>
                 </span>
 
                 <span className="sm:ml-3">
                   <button
                     type="button"
-                    className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    onClick={() => onDeleteUserClick(user)}
+                    className="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   >
-                    <CheckIcon
+                    <TrashIcon
                       className="-ml-0.5 mr-1.5 h-5 w-5"
                       aria-hidden="true"
                     />
-                    Publish
+                    Delete
                   </button>
                 </span>
 
@@ -163,15 +180,12 @@ function List({
                       </Menu.Item>
                       <Menu.Item>
                         {({ active }) => (
-                          <a
-                            href="#"
-                            className={classNames(
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm text-gray-700"
-                            )}
-                          >
+                          <Link key={user.id} href={`/users/${user.id}`} className={classNames(
+                            active ? "bg-gray-100" : "",
+                            "block px-4 py-2 text-sm text-gray-700"
+                          )}>
                             View
-                          </a>
+                          </Link>
                         )}
                       </Menu.Item>
                     </Menu.Items>
@@ -194,4 +208,5 @@ const mapStateToProps = ({ user }: any) => {
 
 export default connect(mapStateToProps, {
   listUsers: readUsers,
+  deleteAction: deleteUser
 })(List);
