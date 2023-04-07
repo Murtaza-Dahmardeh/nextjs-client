@@ -26,16 +26,16 @@ const API_PRIVATE_BASE_URL = 'http://localhost:8000/api';
 const takeEvery: any = Eff.takeEvery;
 
 interface UserPayload {
-    id: string;
-    name: string;
-    email: string;
-    // add any other properties here as needed
+  id: string;
+  name: string;
+  email: string;
+  // add any other properties here as needed
 }
 
-function* createUser({ payload }: { payload: any }) : Generator<any, void, any> {
+function* createUser({ payload }: { payload: any }): Generator<any, void, any> {
   try {
     const response = yield call(() => axios.post('http://localhost:8000/api/users', payload));
-    
+
     const item = { ...response.data };
     yield put(createUserSuccess(item.data));
   } catch (error: any) {
@@ -51,10 +51,10 @@ function* watchCreateUser() {
   yield takeEvery(CREATE_USER, createUser);
 }
 
-function* readUser({ payload }: { payload: any }) : Generator<any, void, any> {
+function* readUser({ payload }: { payload: any }): Generator<any, void, any> {
   try {
     const response = yield call(() => axios.get(`http://localhost:8000/api/users/${payload.id}`));
-    
+
     const item = { ...response.data };
     yield put(readUserSuccess(item));
   } catch (error: any) {
@@ -70,10 +70,10 @@ function* watchReadUser() {
   yield takeEvery(READ_USER, readUser);
 }
 
-function* readUsers() : Generator<any, void, any> {
+function* readUsers(): Generator<any, void, any> {
   try {
     const response = yield call(() => axios.get('http://localhost:8000/api/users'));
-    
+
     const item = response.data.users;
     yield put(readUsersSuccess(item));
   } catch (error: any) {
@@ -89,21 +89,15 @@ function* watchReadUsers() {
   yield takeEvery(READ_USERS, readUsers);
 }
 
-function* updateUser({ payload }: { payload: UserPayload }) : Generator<any, void, any> {
+function* updateUser({ payload }: { payload: any }): Generator<any, void, any> {
   try {
-    const response = yield call(
-      axios.post,
-      `${API_PRIVATE_BASE_URL}/update-user`,
-      {
-        payload,
-      }
-    );
+    const response = yield call(() => axios.post(`http://localhost:8000/api/update/${payload.id}`, payload.formData));
 
-    const item = { ...response.data.updatedUser };
-    yield put(updateUserSuccess(item));
+    const item = { ...response.data };
+    yield put(createUserSuccess(item.data));
   } catch (error: any) {
     yield put(
-      updateUserError(
+      createUserError(
         error.response === undefined ? error.message : error.response.data.error
       )
     );
@@ -114,7 +108,7 @@ function* watchUpdateUser() {
   yield takeEvery(UPDATE_USER, updateUser);
 }
 
-function* deleteUser({ payload }: { payload: any }) : Generator<any, void, any> {
+function* deleteUser({ payload }: { payload: any }): Generator<any, void, any> {
   try {
     console.log(payload)
     const response = yield call(() => axios.delete(`http://localhost:8000/api/users/${payload.id}`));
@@ -131,7 +125,7 @@ function* deleteUser({ payload }: { payload: any }) : Generator<any, void, any> 
 }
 
 function* watchDeleteUser() {
-    yield takeEvery(DELETE_USER, deleteUser);
+  yield takeEvery(DELETE_USER, deleteUser);
 }
 
 export default function* rootSaga() {

@@ -3,7 +3,7 @@ import Header from "@components/components/Header";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { connect } from "react-redux";
-import { readUser } from '../../redux/actions';
+import { readUser } from '@components/redux/actions';
 
 interface User {
   bio: string;

@@ -46,7 +46,7 @@ function List({
 
   async function onDeleteUserClick(user: any) {
     await deleteAction(user.id);
-    setUserList(userlist.filter(list => list.id !== user.id))
+    setUserList(userlist.filter((list:any) => list.id !== user.id))
   }
 
   return (
@@ -112,7 +112,9 @@ function List({
                       className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400"
                       aria-hidden="true"
                     />
-                    Edit
+                    <Link key={user.id} href={`/users/create/${user.id}`} className="block text-sm text-gray-700">
+                      Edit
+                    </Link>
                   </button>
                 </span>
 
@@ -125,7 +127,7 @@ function List({
                       className="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400"
                       aria-hidden="true"
                     />
-                    <Link key={user.id} href={`/users/${user.id}`} className="block text-sm text-gray-700">
+                    <Link key={user.id} href={`/users/view/${user.id}`} className="block text-sm text-gray-700">
                       View
                     </Link>
                   </button>
@@ -167,20 +169,17 @@ function List({
                     <Menu.Items className="absolute right-0 z-10 -mr-1 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <Menu.Item>
                         {({ active }) => (
-                          <a
-                            href="#"
-                            className={classNames(
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm text-gray-700"
-                            )}
-                          >
+                          <Link key={user.id} href={`/users/${user.id}`} className={classNames(
+                            active ? "bg-gray-100" : "",
+                            "block px-4 py-2 text-sm text-gray-700"
+                          )}>
                             Edit
-                          </a>
+                          </Link>
                         )}
                       </Menu.Item>
                       <Menu.Item>
                         {({ active }) => (
-                          <Link key={user.id} href={`/users/${user.id}`} className={classNames(
+                          <Link key={user.id} href={`/users/view/${user.id}`} className={classNames(
                             active ? "bg-gray-100" : "",
                             "block px-4 py-2 text-sm text-gray-700"
                           )}>

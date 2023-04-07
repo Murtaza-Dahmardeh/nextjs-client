@@ -10,9 +10,9 @@ import ReactCrop, {
 import 'react-image-crop/dist/ReactCrop.css';
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { connect } from "react-redux";
-import { createUser } from '../../redux/actions';
-import { canvasPreview } from '../../components/canvasPreview'
-import { useDebounceEffect } from '../../components/useDebounceEffect'
+import { createUser, readUser, updateUser } from '@components/redux/actions';
+import { canvasPreview } from '@components/components/canvasPreview'
+import { useDebounceEffect } from '@components/components/useDebounceEffect'
 import { useRouter } from 'next/router'
 
 function classNames(...classes: string[]) {
@@ -21,13 +21,20 @@ function classNames(...classes: string[]) {
 
 function Register({
   registerUserAction,
-  userInfo
+  userInfo,
+  action,
+  readUserAction,
+  updateUserAction
 }: any) {
   const [agreed, setAgreed] = useState(false);
-
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [title, setTitle] = useState('');
+  const [company, setCompany] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [bio, setBio] = useState('');
+
   const [imgSrc, setImgSrc] = useState('');
   const [profileSrc, setProfileSrc] = useState('');
   const [profilePicName, setProfilePicName] = useState('');
@@ -40,6 +47,13 @@ function Register({
   const [open, setOpen] = useState(false);
   const cancelButtonRef = useRef(null);
   const router = useRouter();
+  const { id } = router.query;
+
+  useEffect(() => {
+    if (id !== "0" && id !== undefined) {
+      readUserAction(id);
+    }
+  }, [id]);
 
   useEffect(() => {
     if (profilePicName != "") {
@@ -61,11 +75,20 @@ function Register({
   }, [profilePicName]);
 
   useEffect(() => {
-    console.log(userInfo);
-    if (userInfo.id) {
-      router.push(`/users/${userInfo.id}`)
+    if(action === "CREATE_USER_SUCCESS") {
+      if (userInfo.id) {
+        router.push(`/users/view/${userInfo.id}`)
+      }
+    } else if (action === "READ_USER_SUCCESS") {
+      setFirstName(userInfo.first_name);
+      setLastName(userInfo.last_name);
+      setTitle(userInfo.title);
+      setCompany(userInfo.company);
+      setEmail(userInfo.email);
+      setPhone(userInfo.phone_number);
+      setBio(userInfo.bio);
+      setProfilePicName(userInfo.profile_picture);
     }
-    console.log(userInfo)
   }, [userInfo]);
 
   function onUserRegister(event: { preventDefault: () => void; target: any; } | undefined) {
@@ -74,7 +97,13 @@ function Register({
       const form = event.target; // get the form element
       const formData = new FormData(form); // create a new FormData object with the form data  
       formData.append('profile_picture', profilePicName);
-      registerUserAction(formData);
+
+      if (id !== "0" && id !== undefined) {
+        formData.append('_method', 'PUT');
+        updateUserAction(formData, id);
+      } else {
+        registerUserAction(formData);
+      }
     }
   };
 
@@ -230,6 +259,7 @@ function Register({
                 type="text"
                 name="first_name"
                 id="first-name"
+                value={firstName}
                 onChange={(event) => setFirstName(event.target.value)}
                 autoComplete="given-name"
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -248,6 +278,7 @@ function Register({
                 type="text"
                 name="last_name"
                 id="last-name"
+                value={lastName}
                 onChange={(event) => setLastName(event.target.value)}
                 autoComplete="family-name"
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -266,6 +297,7 @@ function Register({
                 type="text"
                 name="title"
                 id="title"
+                value={title}
                 onChange={(event) => setTitle(event.target.value)}
                 autoComplete="organization"
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -284,6 +316,8 @@ function Register({
                 type="text"
                 name="company"
                 id="company"
+                value={company}
+                onChange={(event) => setCompany(event.target.value)}
                 autoComplete="organization"
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
@@ -301,6 +335,8 @@ function Register({
                 type="email"
                 name="email"
                 id="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
@@ -336,6 +372,8 @@ function Register({
                 type="tel"
                 name="phone_number"
                 id="phone-number"
+                value={phone}
+                onChange={(event) => setPhone(event.target.value)}
                 autoComplete="tel"
                 className="block w-full rounded-md border-0 px-3.5 py-2 pl-20 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
               />
@@ -353,8 +391,9 @@ function Register({
                 name="bio"
                 id="message"
                 rows={4}
+                value={bio}
+                onChange={(event) => setBio(event.target.value)}
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                defaultValue={""}
               />
             </div>
           </div>
@@ -515,6 +554,7 @@ function Register({
         <div className="mt-10">
           <button
             type="submit"
+            disabled={!agreed}
             className="block w-full rounded-md bg-indigo-600 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
             Submit
@@ -533,4 +573,6 @@ const mapStateToProps = ({ user }: any) => {
 
 export default connect(mapStateToProps, {
   registerUserAction: createUser,
+  readUserAction: readUser,
+  updateUserAction: updateUser
 })(Register);

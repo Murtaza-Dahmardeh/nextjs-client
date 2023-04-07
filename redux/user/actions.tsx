@@ -62,9 +62,9 @@ export const readUsersError = (message: any) => ({
     payload: { message },
 });
 
-export const updateUser = (user: any) => ({
+export const updateUser = (formData: any, id: string) => ({
     type: UPDATE_USER,
-    payload: { user },
+    payload: {formData, id},
 });
 
 export const updateUserSuccess = (updatedUser: any) => ({

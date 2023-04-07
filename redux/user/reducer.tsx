@@ -32,9 +32,11 @@ const INIT_STATE: UserState = {
     users: []
 };
 
-export default (state = INIT_STATE, action: { type: string; payload: {
-    users: any; message: any; user: any; 
-}; }) => {
+export default (state = INIT_STATE, action: {
+    type: string; payload: {
+        users: any; message: any; user: any;
+    };
+}) => {
     switch (action.type) {
         case CREATE_USER:
         case CREATE_USER_SUCCESS:
@@ -90,6 +92,10 @@ export default (state = INIT_STATE, action: { type: string; payload: {
             return {
                 ...state,
                 loading: action.type === UPDATE_USER,
+                userInfo:
+                    action.type === UPDATE_USER_SUCCESS
+                        ? action.payload.user
+                        : state.userInfo,
                 notification:
                     action.type === UPDATE_USER_SUCCESS
                         ? 'درخواست شما با موفقیت انجام شد'
