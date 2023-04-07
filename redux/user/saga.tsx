@@ -37,7 +37,7 @@ function* createUser({ payload }: { payload: any }) : Generator<any, void, any> 
     const response = yield call(() => axios.post('http://localhost:8000/api/users', payload));
     
     const item = { ...response.data };
-    yield put(createUserSuccess(item));
+    yield put(createUserSuccess(item.data));
   } catch (error: any) {
     yield put(
       createUserError(
@@ -53,15 +53,9 @@ function* watchCreateUser() {
 
 function* readUser({ payload }: { payload: any }) : Generator<any, void, any> {
   try {
-    const response = yield call(
-      axios.post,
-      `${API_PRIVATE_BASE_URL}/readUser`,
-      {
-        payload,
-      }
-    );
-
-    const item = { ...response.data.user };
+    const response = yield call(() => axios.get(`http://localhost:8000/api/users/${payload.id}`));
+    
+    const item = { ...response.data };
     yield put(readUserSuccess(item));
   } catch (error: any) {
     yield put(

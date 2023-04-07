@@ -1,7 +1,54 @@
 import { PaperClipIcon } from "@heroicons/react/20/solid";
 import Header from "@components/components/Header";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { connect } from "react-redux";
+import { readUser } from '../../redux/actions';
 
-export default function Example() {
+interface User {
+  bio: string;
+  phone_number: string;
+  first_name: string;
+  last_name: string;
+  id: number;
+  email: string;
+  title: string;
+  company: string;
+}
+
+function UserDetails({
+  readUserAction,
+  userInfo
+}: any) {
+  const [profileSrc, setProfileSrc] = useState('');
+  const router = useRouter();
+  const { id } = router.query;
+
+  useEffect(() => {
+    if (id) {
+      readUserAction(id);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (userInfo.profile_picture) {
+      fetch(`http://localhost:8000/api/photos/${userInfo.profile_picture}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch image');
+          }
+          return response.blob();
+        })
+        .then(blob => {
+          const imageUrl = URL.createObjectURL(blob);
+          setProfileSrc(imageUrl);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+  }, [userInfo]);
+  
   return (
     <div className="isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
       <div
@@ -20,8 +67,6 @@ export default function Example() {
         <div className="mx-auto max-w-2xl">
           <div className="overflow-hidden bg-white shadow sm:rounded-lg">
             <div className="px-4 py-5 sm:px-6">
-
-
               <div
                 className="flex items-center justify-between gap-x-6"
               >
@@ -36,7 +81,7 @@ export default function Example() {
 
                 <img
                   className="h-16 w-16 rounded-md"
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                  src={profileSrc == "" ? "https://placehold.co/400x400?text=Please+Upload" : profileSrc}
                   alt=""
                 />
               </div>
@@ -48,7 +93,7 @@ export default function Example() {
                     Full name
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                    Margot Foster
+                    {userInfo ? userInfo.first_name + " " + userInfo.last_name: ""}
                   </dd>
                 </div>
                 <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -56,7 +101,7 @@ export default function Example() {
                     Job Title
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                    Back End Developer
+                  {userInfo ? userInfo.title: ""}
                   </dd>
                 </div>
                 <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -64,7 +109,7 @@ export default function Example() {
                     Company
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                    Kabul IT
+                  {userInfo ? userInfo.company: ""}
                   </dd>
                 </div>
                 <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -72,7 +117,7 @@ export default function Example() {
                     Email address
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                    margotfoster@example.com
+                  {userInfo ? userInfo.email: ""}
                   </dd>
                 </div>
                 <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -80,17 +125,13 @@ export default function Example() {
                     Phone
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                    078323423
+                  {userInfo ? userInfo.phone_number: ""}
                   </dd>
                 </div>
                 <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">About</dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                    Fugiat ipsum ipsum deserunt culpa aute sint do nostrud anim
-                    incididunt cillum culpa consequat. Excepteur qui ipsum
-                    aliquip consequat sint. Sit id mollit nulla mollit nostrud
-                    in ea officia proident. Irure nostrud pariatur mollit ad
-                    adipisicing reprehenderit deserunt qui eu.
+                  {userInfo ? userInfo.bio: ""}
                   </dd>
                 </div>
 
@@ -102,3 +143,12 @@ export default function Example() {
     </div>
   );
 }
+
+const mapStateToProps = ({ user }: any) => {
+  const { loading, notification, userInfo, action } = user;
+  return { loading, notification, userInfo, action };
+};
+
+export default connect(mapStateToProps, {
+  readUserAction: readUser,
+})(UserDetails);

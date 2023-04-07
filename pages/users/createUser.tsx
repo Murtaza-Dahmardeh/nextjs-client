@@ -39,6 +39,7 @@ function Register({
 
   const [open, setOpen] = useState(false);
   const cancelButtonRef = useRef(null);
+  const router = useRouter();
 
   useEffect(() => {
     if (profilePicName != "") {
@@ -60,8 +61,8 @@ function Register({
   }, [profilePicName]);
 
   useEffect(() => {
+    console.log(userInfo);
     if (userInfo.id) {
-      const router = useRouter()
       router.push(`/users/${userInfo.id}`)
     }
     console.log(userInfo)
