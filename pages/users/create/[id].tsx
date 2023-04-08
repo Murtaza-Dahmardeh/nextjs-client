@@ -28,6 +28,7 @@ function Register({
   updateUserAction,
   notification
 }: any) {
+  const API_PRIVATE_BASE_URL = 'https://5a8b-203-171-108-22.ngrok-free.app/api';
   const [agreed, setAgreed] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -59,7 +60,13 @@ function Register({
 
   useEffect(() => {
     if (profilePicName != "") {
-      fetch(`http://localhost:8000/api/photos/${profilePicName}`)
+      fetch(`${API_PRIVATE_BASE_URL}/photos/${profilePicName}`, {
+        headers : {
+          "ngrok-skip-browser-warning": "true",
+          "credentials": "true",
+          'Access-Control-Allow-Origin' : '*',
+        }
+      })
         .then(response => {
           if (!response.ok) {
             throw new Error('Failed to fetch image');
@@ -160,9 +167,14 @@ function Register({
       const formData = new FormData()
       formData.append('image', blob, 'image.jpg')
 
-      fetch('http://localhost:8000/api/upload', {
+      fetch(`${API_PRIVATE_BASE_URL}/upload`, {
         method: 'POST',
         body: formData,
+        headers : {
+          "ngrok-skip-browser-warning": "true",
+          "credentials": "true",
+          'Access-Control-Allow-Origin' : '*',
+        }
       }).then(response => response.json())
         .then(data => {
           setProfilePicName(data.filename.replace('photos/', ''));

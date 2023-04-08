@@ -22,19 +22,18 @@ import {
   readUsersError,
 } from './actions';
 
-const API_PRIVATE_BASE_URL = 'http://localhost:8000/api';
+const API_PRIVATE_BASE_URL = 'https://5a8b-203-171-108-22.ngrok-free.app/api';
 const takeEvery: any = Eff.takeEvery;
-
-interface UserPayload {
-  id: string;
-  name: string;
-  email: string;
-  // add any other properties here as needed
-}
 
 function* createUser({ payload }: { payload: any }): Generator<any, void, any> {
   try {
-    const response = yield call(() => axios.post('http://localhost:8000/api/users', payload));
+    const response = yield call(() => axios.post(`${API_PRIVATE_BASE_URL}/users`, payload, {
+      headers : {
+        "ngrok-skip-browser-warning": true,
+        "credentials": true,
+        'Access-Control-Allow-Origin' : '*',
+      }
+    }));
 
     const item = { ...response.data };
     yield put(createUserSuccess(item.data));
@@ -53,7 +52,13 @@ function* watchCreateUser() {
 
 function* readUser({ payload }: { payload: any }): Generator<any, void, any> {
   try {
-    const response = yield call(() => axios.get(`http://localhost:8000/api/users/${payload.id}`));
+    const response = yield call(() => axios.get(`${API_PRIVATE_BASE_URL}/users/${payload.id}`, {
+      headers : {
+        "ngrok-skip-browser-warning": true,
+        "credentials": true,
+        'Access-Control-Allow-Origin' : '*',
+      }
+    }));
 
     const item = { ...response.data };
     yield put(readUserSuccess(item));
@@ -72,7 +77,13 @@ function* watchReadUser() {
 
 function* readUsers(): Generator<any, void, any> {
   try {
-    const response = yield call(() => axios.get('http://localhost:8000/api/users'));
+    const response = yield call(() => axios.get(`${API_PRIVATE_BASE_URL}/users`, {
+      headers : {
+        "ngrok-skip-browser-warning": true,
+        "credentials": true,
+        'Access-Control-Allow-Origin' : '*',
+      }
+    }));
 
     const item = response.data.users;
     yield put(readUsersSuccess(item));
@@ -91,7 +102,13 @@ function* watchReadUsers() {
 
 function* updateUser({ payload }: { payload: any }): Generator<any, void, any> {
   try {
-    const response = yield call(() => axios.post(`http://localhost:8000/api/update/${payload.id}`, payload.formData));
+    const response = yield call(() => axios.post(`${API_PRIVATE_BASE_URL}/update/${payload.id}`, payload.formData, {
+      headers : {
+        "ngrok-skip-browser-warning": true,
+        "credentials": true,
+        'Access-Control-Allow-Origin' : '*',
+      }
+    }));
 
     const item = { ...response.data };
     yield put(updateUserSuccess(item.data));
@@ -111,7 +128,13 @@ function* watchUpdateUser() {
 function* deleteUser({ payload }: { payload: any }): Generator<any, void, any> {
   try {
     console.log(payload)
-    const response = yield call(() => axios.delete(`http://localhost:8000/api/users/${payload.id}`));
+    const response = yield call(() => axios.delete(`${API_PRIVATE_BASE_URL}/users/${payload.id}`, {
+      headers : {
+        "ngrok-skip-browser-warning": true,
+        "credentials": true,
+        'Access-Control-Allow-Origin' : '*',
+      }
+    }));
 
     const item = { ...response.data.message };
     yield put(deleteUserSuccess(item));

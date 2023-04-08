@@ -9,6 +9,7 @@ function UserDetails({
   readUserAction,
   userInfo
 }: any) {
+  const API_PRIVATE_BASE_URL = 'https://5a8b-203-171-108-22.ngrok-free.app/api';
   const [profileSrc, setProfileSrc] = useState('');
   const router = useRouter();
   const { id } = router.query;
@@ -21,7 +22,13 @@ function UserDetails({
 
   useEffect(() => {
     if (userInfo.profile_picture) {
-      fetch(`http://localhost:8000/api/photos/${userInfo.profile_picture}`)
+      fetch(`${API_PRIVATE_BASE_URL}/photos/${userInfo.profile_picture}`, {
+        headers : {
+          "ngrok-skip-browser-warning": "true",
+          "credentials": "true",
+          'Access-Control-Allow-Origin' : '*',
+        }
+      })
         .then(response => {
           if (!response.ok) {
             throw new Error('Failed to fetch image');
